@@ -1,9 +1,8 @@
+use crate::config::Config;
+use battery::{Battery, Manager, State};
 use std::error::Error;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
-use std::io::ErrorKind;
-use battery::{Battery, Manager, State};
-use crate::config::Config;
 
 type EventCallback = fn(&Config, bool);
 
@@ -24,22 +23,20 @@ impl fmt::Display for NoBatteryError {
 
 pub(crate) struct BatteryWatch {
     manager: Manager,
-    battery: Option<Battery>,
     on_event: EventCallback,
 }
 
-unsafe impl Send for BatteryWatch{}
-unsafe impl Sync for BatteryWatch{}
-
+unsafe impl Send for BatteryWatch {}
+unsafe impl Sync for BatteryWatch {}
 
 impl BatteryWatch {
     pub(crate) fn new(on_event: EventCallback) -> Self {
         Self {
             manager: Manager::new().unwrap(),
-            battery: None,
             on_event,
         }
     }
+
     pub fn list_batteries(&self) -> bool {
         match self.manager.batteries() {
             Ok(batteries) => {
@@ -60,47 +57,35 @@ impl BatteryWatch {
         true
     }
 
-    pub fn get_battery_charging(&self) -> Result<bool, std::io::Error> {
-        match &self.battery {
-            Some(akku) => {
-                match akku.state() {
-                    State::Unknown => return Ok(true),
-                    State::Charging => return Ok(true),
-                    State::Full => return Ok(true),
-                    _ => return Ok(false)
-                }
-            },
-            _ => Err(std::io::Error::new(ErrorKind::NotFound, &NoBatteryError {})),
+    fn get_battery_charging(&self, battery: &Battery) -> bool {
+        match battery.state() {
+            State::Unknown => return true,
+            State::Charging => return true,
+            State::Full => return true,
+            _ => return false,
         }
     }
 
-    pub fn get_battery_level(&self) -> Result<f32, std::io::Error> {
-        match &self.battery {
-            Some(akku) => {
-                return Ok(akku.state_of_charge().value)
-            },
-            _ => Err(std::io::Error::new(ErrorKind::NotFound, &NoBatteryError {})),
-        }
+    fn get_battery_level(&self, battery: &Battery) -> f32 {
+        return battery.state_of_charge().value;
     }
 
     pub fn check(&mut self, cfg: &Config) -> () {
-        if self.battery.is_none() {
-           self.battery = Some(self.manager.batteries().unwrap().next().unwrap().unwrap());
-        }
-        if self.battery.is_none() {
-            panic!("No battery found")
-        }
-
-        let is_charging = self.get_battery_charging().unwrap();
-        let percent = (self.get_battery_level().unwrap() * 100.0).round() as u8;
-        if percent <= cfg.range.min {
-            if !is_charging {
-                (self.on_event)(cfg, true);
+        match self.manager.batteries().unwrap().next().unwrap() {
+            Ok(battery) => {
+                let is_charging = self.get_battery_charging(&battery);
+                let percent = (self.get_battery_level(&battery) * 100.0).round() as u8;
+                if percent <= cfg.range.min {
+                    if !is_charging {
+                        (self.on_event)(cfg, true);
+                    }
+                } else if percent >= cfg.range.max {
+                    if is_charging {
+                        (self.on_event)(cfg, false);
+                    }
+                }
             }
-        } else if percent >= cfg.range.max {
-            if is_charging {
-                (self.on_event)(cfg, false);
-            }
+            _ => println!("No battery found"),
         }
     }
 }

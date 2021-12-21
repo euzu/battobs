@@ -29,7 +29,7 @@ pub(crate) fn send_rest(cfg: &RestConfig, on: bool) -> () {
                 }
                 Err(e) => println!("Request failed {}", e),
             }
-        },
+        }
         Err(e) => println!("Misformed url {}", e),
     }
     ()

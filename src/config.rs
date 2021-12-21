@@ -1,17 +1,17 @@
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Range {
-    pub min : u8,
+    pub min: u8,
     pub max: u8,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub(crate) struct Payload {
-   pub off: String,
-   pub on: String,
+    pub off: String,
+    pub on: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,7 +27,7 @@ pub(crate) struct MqttConfig {
     pub server: String,
     pub port: u16,
     pub channel: String,
-    pub payload: Payload
+    pub payload: Payload,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -46,13 +46,11 @@ pub(crate) fn get_exe_path() -> std::path::PathBuf {
     let default_path = std::path::PathBuf::from("./");
     let current_exe = std::env::current_exe();
     match current_exe {
-        Ok(exe) => {
-            match fs::read_link(&exe) {
-                Ok(f) => f.parent().map_or(default_path, |p| p.to_path_buf()),
-                Err(_) => return exe.parent().map_or(default_path, |p| p.to_path_buf())
-            }
+        Ok(exe) => match fs::read_link(&exe) {
+            Ok(f) => f.parent().map_or(default_path, |p| p.to_path_buf()),
+            Err(_) => return exe.parent().map_or(default_path, |p| p.to_path_buf()),
         },
-        Err(_) => default_path
+        Err(_) => default_path,
     }
 }
 
@@ -77,9 +75,10 @@ pub(crate) fn get_default_config_path() -> String {
 }
 
 pub(crate) fn read_config(config_file: &str) -> Config {
-    let cfg: Config = match serde_yaml::from_reader(open_file(&std::path::PathBuf::from(config_file))) {
-        Ok(c) => c,
-        Err(e) => panic!("cant read config file: {}", e)
-    };
+    let cfg: Config =
+        match serde_yaml::from_reader(open_file(&std::path::PathBuf::from(config_file))) {
+            Ok(c) => c,
+            Err(e) => panic!("cant read config file: {}", e),
+        };
     cfg
 }
