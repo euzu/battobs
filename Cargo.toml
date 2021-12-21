@@ -2,7 +2,6 @@
 name = "battobs"
 version = "0.1.0"
 edition = "2021"
-author = "euzu"
 
 [profile.release]
 opt-level = 'z'     # Optimize for size.
@@ -21,3 +20,5 @@ serde_yaml = "0"
 clap = "2"
 rumqttc = "0"
 lazy_static = "1"
+reqwest = { version = "0", features = ["blocking"] }
+strfmt = "0"

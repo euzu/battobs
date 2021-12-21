@@ -1,6 +1,7 @@
 mod observer;
 mod config;
 mod mqtt;
+mod rest;
 
 use std::{thread, time};
 use std::process::exit;
@@ -11,6 +12,7 @@ use lazy_static::lazy_static;
 use crate::config::{Config, read_config};
 use crate::mqtt::{send_mqtt};
 use crate::observer::BatteryWatch;
+use crate::rest::send_rest;
 
 lazy_static! {
     static ref CONFIG: Arc<Mutex<Option<Config>>> = Arc::new(Mutex::new(None));
@@ -33,9 +35,15 @@ fn main() -> Result<()> {
     std::mem::drop(cfg_guard);
 
     let on_battery_event= |cfg: &Config, on: bool| {
-        match &cfg.connection.mqtt {
-            Some(mc) => send_mqtt(mc, on),
-            _=> ()
+        if let Some(mc) = &cfg.connection.mqtt {
+            if mc.enabled {
+               send_mqtt(mc, on);
+            }
+        }
+        if let Some(rc) = &cfg.connection.rest {
+            if rc.enabled {
+                send_rest(rc, on);
+            }
         }
     };
 
@@ -71,7 +79,7 @@ fn get_arguments<'a>() -> ArgMatches<'a> {
         .arg(clap::Arg::with_name("list")
             .short("l")
             .long("list")
-            .takes_value(true)
+            .takes_value(false)
             .help("List batteries"))
         .arg(clap::Arg::with_name("verbose")
             .short("v")

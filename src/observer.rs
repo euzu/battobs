@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::io::ErrorKind;
-use battery::{Battery, Manager};
+use battery::{Battery, Manager, State};
 use crate::config::Config;
 
 type EventCallback = fn(&Config, bool);
@@ -26,7 +26,6 @@ pub(crate) struct BatteryWatch {
     manager: Manager,
     battery: Option<Battery>,
     on_event: EventCallback,
-    power_on: bool
 }
 
 unsafe impl Send for BatteryWatch{}
@@ -39,7 +38,6 @@ impl BatteryWatch {
             manager: Manager::new().unwrap(),
             battery: None,
             on_event,
-            power_on: false
         }
     }
     pub fn list_batteries(&self) -> bool {
@@ -62,9 +60,25 @@ impl BatteryWatch {
         true
     }
 
+    pub fn get_battery_charging(&self) -> Result<bool, std::io::Error> {
+        match &self.battery {
+            Some(akku) => {
+                match akku.state() {
+                    State::Unknown => return Ok(true),
+                    State::Charging => return Ok(true),
+                    State::Full => return Ok(true),
+                    _ => return Ok(false)
+                }
+            },
+            _ => Err(std::io::Error::new(ErrorKind::NotFound, &NoBatteryError {})),
+        }
+    }
+
     pub fn get_battery_level(&self) -> Result<f32, std::io::Error> {
         match &self.battery {
-            Some(akku) => Ok(akku.state_of_charge().value),
+            Some(akku) => {
+                return Ok(akku.state_of_charge().value)
+            },
             _ => Err(std::io::Error::new(ErrorKind::NotFound, &NoBatteryError {})),
         }
     }
@@ -76,16 +90,16 @@ impl BatteryWatch {
         if self.battery.is_none() {
             panic!("No battery found")
         }
+
+        let is_charging = self.get_battery_charging().unwrap();
         let percent = (self.get_battery_level().unwrap() * 100.0).round() as u8;
         if percent <= cfg.range.min {
-            if !self.power_on {
+            if !is_charging {
                 (self.on_event)(cfg, true);
-                self.power_on = true;
             }
         } else if percent >= cfg.range.max {
-            if self.power_on {
+            if is_charging {
                 (self.on_event)(cfg, false);
-                self.power_on = false;
             }
         }
     }

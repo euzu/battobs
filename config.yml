@@ -1,11 +1,18 @@
 range:
   max: 80
-  min: 50
+  min: 40
 connection:
+  rest:
+    enabled: true
+    url: http://192.168.9.91/cm?cmnd={payload}
+    payload:
+      off: Power Off
+      on: Power On
   mqtt:
+    enabled: false
     server: 192.168.9.160
     port: 1883
-    channel: z2m/lidl_2/set
+    channel: z2m/laptop_plug/set
     payload:
       off: "{\"state\": \"off\"}"
       on: "{\"state\": \"on\"}"
