@@ -1,0 +1,23 @@
+[package]
+name = "battobs"
+version = "0.1.0"
+edition = "2021"
+author = "euzu"
+
+[profile.release]
+opt-level = 'z'     # Optimize for size.
+lto = true          # Enable Link Time Optimization
+codegen-units = 1   # Reduce number of codegen units to increase optimizations.
+panic = 'abort'     # Abort on panic
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+battery = "0.7"
+ctrlc = "3"
+serde = {varsion = "1", features = ["derive"]}
+serde_yaml = "0"
+clap = "2"
+rumqttc = "0"
+lazy_static = "1"

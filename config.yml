@@ -1,0 +1,11 @@
+range:
+  max: 80
+  min: 50
+connection:
+  mqtt:
+    server: 192.168.9.160
+    port: 1883
+    channel: z2m/lidl_2/set
+    payload:
+      off: "{\"state\": \"off\"}"
+      on: "{\"state\": \"on\"}"
