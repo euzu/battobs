@@ -38,6 +38,7 @@ pub(crate) struct ConnectionConfig {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Config {
+    pub check_interval_sec: u16,
     pub range: Range,
     pub connection: ConnectionConfig,
 }

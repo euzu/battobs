@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.euzu.battobs</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/battobs/battobs</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/opt/battobs</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>OnDemand</key>
+    <false/>
+
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/battobs_err.log</string>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/battobs_log.log</string>
+</dict>
+</plist>

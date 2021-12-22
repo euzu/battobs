@@ -1,0 +1,5 @@
+The installation asumes that you have installed the application under /opt/battobs
+If not, you need to replace all occurrences of /opt/battobs
+
+1.) copy com.euzu.battobs.plist to ~/Library/LaunchAgents/
+2.) launchctl load ~/Library/LaunchAgents/com.euzu.battobs.plist

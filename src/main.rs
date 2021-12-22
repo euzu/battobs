@@ -52,7 +52,13 @@ fn main() -> Result<()> {
 
     let handle = thread::spawn(move || {
         let mut battery_watch = BatteryWatch::new(on_battery_event);
-        let duration = time::Duration::from_secs(60);
+        let cfg_guard = CONFIG.lock().unwrap();
+        let mut check_interval_sec = 120;
+        if let Some(ref cfg) = *cfg_guard {
+            check_interval_sec = cfg.check_interval_sec as u64;
+        }
+        std::mem::drop(cfg_guard);
+        let duration = time::Duration::from_secs(check_interval_sec);
         loop {
             let cfg_guard = CONFIG.lock().unwrap();
             if let Some(ref cfg) = *cfg_guard {
