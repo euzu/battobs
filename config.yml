@@ -3,7 +3,7 @@ range:
   min: 40
 connection:
   rest:
-    enabled: true
+    enabled: false
     url: http://192.168.9.91/cm?cmnd={payload}
     payload:
       off: Power Off

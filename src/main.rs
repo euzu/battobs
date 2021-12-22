@@ -2,6 +2,7 @@ mod config;
 mod mqtt;
 mod observer;
 mod rest;
+mod signal;
 
 use crate::config::{read_config, Config};
 use crate::mqtt::send_mqtt;
@@ -13,6 +14,7 @@ use lazy_static::lazy_static;
 use std::process::exit;
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
+use crate::signal::signal_handling;
 
 lazy_static! {
     static ref CONFIG: Arc<Mutex<Option<Config>>> = Arc::new(Mutex::new(None));
@@ -46,9 +48,8 @@ fn main() -> Result<()> {
         }
     };
 
-    match ctrlc::set_handler(|| std::process::exit(0)) {
-        _ => (),
-    }
+    signal_handling();
+
     let handle = thread::spawn(move || {
         let mut battery_watch = BatteryWatch::new(on_battery_event);
         let duration = time::Duration::from_secs(60);

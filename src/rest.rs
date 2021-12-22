@@ -20,7 +20,6 @@ pub(crate) fn send_rest(cfg: &RestConfig, on: bool) -> () {
 
     match strfmt(&cfg.url, &map!["payload".to_string() => payload]) {
         Ok(url) => {
-            println!("calling url {}", &url);
             match reqwest::blocking::get(url) {
                 Ok(res) => {
                     if !res.status().is_success() {
