@@ -10,6 +10,7 @@ the config.yml looks like:
 range:
   max: 80
   min: 40
+check_interval_sec: 60
 connection:
   rest:
     enabled: true
